@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="prefetch" href="./data/cards.json">
+    <link rel="prefetch" href="./data/stores.json">
+    <link rel="prefetch" href="https://v4.tocas-ui.com/zh-tw/assets/images/4-3.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocas/4.0.4/tocas.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tocas/4.0.4/tocas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link rel="prefetch" href="https://unpkg.com/petite-vue?module">
+    <!-- End Google Tag Manager -->
+    <title>信用卡回饋整理 - Leko</title>
+    <script>
+        const lazyImageObserver = new IntersectionObserver(function (entries, observer) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    let lazyImage = entry.target;
+                    lazyImage.src = lazyImage.dataset.src;
+                    lazyImage.classList.remove("lazy");
+                    lazyImageObserver.unobserve(lazyImage);
+                }
+            });
+        });
+        function lazyLoadImages() {
+            document.querySelectorAll("img.lazy").forEach(lazyImage => {
+                lazyImageObserver.observe(lazyImage);
+            });
+        }
+    </script>
+</head>
+
+<body v-scope>
+    <div class="ts-content is-tertiary is-fitted">
+        <div class="ts-container is-fluid">
+            <div class="ts-row is-middle-aligned">
+                <div class="column is-fluid">
+                    <div class="ts-tab">
+                        <a href="https://nycu.moe" class="item is-not-minimal">Leko Toolbox</a>
+                        <a href="#!" class="item is-active">
+                            <span class="ts-icon is-images-icon"></span>
+                        </a>
+                    </div>
+                </div>
+                <div class="column"></div>
+                <div class="column"></div>
+                <div class="column"></div>
+            </div>
+        </div>
+    </div>
+    <div class="ts-divider"></div>
+    <div class="ts-content is-tertiary is-vertically-padded">
+        <div class="ts-space"></div>
+        <div class="ts-container">
+            <div class="ts-header is-big is-heavy">信用卡回饋整理</div>
+            <div class="ts-text is-secondary" data-lang="secondary-title">我需要錢</div>
+        </div>
+        <div class="ts-space"></div>
+    </div>
+    <div class="ts-divider"></div>
+    <div class="ts-space is-big"></div>
+    <div class="ts-container">
+        <div class="ts-row">
+            <div class="column is-fluid">
+                <div class="ts-input is-fluid">
+                    <input type="text" class="input" placeholder="搜尋…" @input="search($el.value)" />
+                </div>
+            </div>
+        </div>
+        <div class="ts-space is-large"></div>
+        <div v-for="i in Math.ceil(Object.keys(stores).length / itemsPerRow)">
+            <div :class="`ts-grid is-stackable is-${itemsPerRow}-columns`">
+                <div class="column" v-for="[storeId, store] in Object.entries(stores).slice((i - 1) * itemsPerRow, i * itemsPerRow)" :key="storeId">
+                    <div class="ts-box is-elevated">
+                        <div class="ts-space"></div>
+                        <div class="ts-image is-centered is-small is-covered">
+                            <img :src="store.img" style="height: 100px; width: auto;">
+                        </div>
+                        <div>
+                            <div class="ts-header is-center-aligned is-heavy" v-if="store.name">
+                                {{store.name}}
+                            </div>
+                            <div class="ts-space"></div>
+                            <span v-for="(card, name, index) in store.cards" :key="card.name">
+                                <div class="ts-box is-horizontal is-squared" >
+                                    <div class="ts-image is-centered is-covered">
+                                        <img style="width: 180px; height: 100%;" :src="cards[name].img">
+                                    </div>
+                                    <div class="ts-content">
+                                        <div class="ts-header">
+                                            {{cards[name].name}}
+                                        </div>
+                                        <div class="ts-text">{{card.reward}}</div>
+                                        <div class="ts-text is-secondary" v-if="card.due">~{{card.due}}</div>
+                                    </div>
+                                </div>
+                                <div class="ts-space is-small" v-if="index !== Object.keys(store.cards).length - 1"></div>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ts-space is-large"></div>
+        </div>
+        <div class="ts-space is-large"></div>
+        <div class="ts-text is-center-aligned is-description">
+            Made by <a href="https://leko.moe">Leko</a> with ❤️
+        </div>
+        <div class="ts-space is-large"></div>
+        <div class="ts-text is-center-aligned is-description">
+            © <span>{{ year }}</span> Leko
+        </div>
+    </div>
+</body>
+
+<footer>
+    <script type="module">
+        import { createApp, reactive } from 'https://unpkg.com/petite-vue?module';
+
+        const cards = {};
+        const stores = await fetch('./data/stores.json').then(res => res.json());
+        Object.values(stores).forEach(x => {
+            x.cards = {};
+            x.isVisible = true;
+        });
+
+        await ((async() => {
+            const rawCards = await fetch('./data/cards.json').then(res => res.json());
+
+            for(const cardId of rawCards){
+                const card = await fetch(`./data/cards/${cardId}.json`).then(res => res.json());
+                cards[cardId] = {
+                    name: card.name,
+                    img: card.img
+                };
+                for(const [storeId, reward] of Object.entries(card.rewards)){
+                    stores[storeId].cards[cardId] = reward
+                }
+            }
+        }))();
+
+        createApp({
+            itemsPerRow: 3,
+
+            stores,
+            cards,
+
+            year: new Date().getFullYear(),
+
+            search(name) {
+                if (name.length === 0) {
+                    return this.stores = stores;
+                }
+
+                this.stores = Object.fromEntries(Object.entries(stores).filter(([storeId, store]) => {
+                    for(const x of [...store.tags, store.name, store.comment]){
+                        if(x.toLowerCase().includes(name.toLowerCase())){
+                            return true;
+                        }
+                    }
+                    return false;
+                }))
+            }
+        }).mount();
+
+        lazyLoadImages()
+    </script>
+</footer>
+
+</html>

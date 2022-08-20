@@ -1,0 +1,26 @@
+{
+    "name": "永豐大戶信用卡",
+    "img": "./img/card/dawho.png",
+    "rewards": {
+        "vieshow": {
+            "reward": "7%",
+            "due": "2022/12/31"
+        },
+        "netflix": {
+            "reward": "7%",
+            "due": "2022/12/31"
+        },
+        "spotify": {
+            "reward": "7%",
+            "due": "2022/12/31"
+        },
+        "kkbox": {
+            "reward": "7%",
+            "due": "2022/12/31"
+        },
+        "opentix": {
+            "reward": "7%",
+            "due": "2022/12/31"
+        }
+    }
+}
